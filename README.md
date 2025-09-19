@@ -12,10 +12,11 @@
 Minha implementação usava laços para criar vários *file descriptors* (FDs) simultaneamente.  
 Parece que um dos testes do exame da 42 para esta função (`picoshell`) primeiro usa o comando no terminal:
 
-```c
+```bash
 ulimit -n 1024
-forçando o sistema a permitir no máximo 1024 FDs abertos. E o trecho:
-
+```
+Forçando o sistema a permitir no máximo 1024 FDs abertos. E o trecho:
+```c
 for (int i = 0; i < count - 1; i++){ // pipes
     if (pipe(pipes[i]) < 0){
         // fechar os anteriores
