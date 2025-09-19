@@ -4,7 +4,7 @@
 #include <string.h>
 #include <sys/wait.h>
 
-/*
+
 int picoshell(char **cmds[]){
 	if (!cmds || !cmds[0])
 		return (1);
@@ -52,6 +52,7 @@ int picoshell(char **cmds[]){
 			if (i != count - 1){
 				dup2(pipes[i][1], 1);
 			}
+			//cade o for para fechar os pipes(fd's)
 			execvp(cmds[i][0], cmds[i]);
 			exit (1);		
 		}
@@ -65,7 +66,7 @@ int picoshell(char **cmds[]){
 	wait(&status);
 	return (0);
 }
-*/
+
 
 /* Assignment name:    picoshell
 Expected files:        picoshell.c
