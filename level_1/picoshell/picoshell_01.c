@@ -29,7 +29,7 @@ int picoshell(char **cmds[])
 		if (pid < 0){
 			if (pipes[0] != -1)
 				close(pipes[0]);
-			if (pipes[0] != -1)
+			if (pipes[1] != -1)
 				close(pipes[1]);
 			if (in_fd != 0)
 				close(in_fd);
