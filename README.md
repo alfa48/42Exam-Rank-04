@@ -3,23 +3,29 @@
 
 ## picoshell
 
-
-### Implementacão inicial
+### Implementação inicial
 
 #### Problema
 
-- Too many open files
+- **Too many open files**
 
-Minha implementação usava laços para criar vários files descriptors(fd's) simultaneamente
-e parece que o um dos testes do exame da 42  para esta função(picoshell) primero usa o commando no terminal 'ulimit -n 1024' forcando o sistema a permitir no maximo 1024 fd's abertos. E o:
+Minha implementação usava laços para criar vários *file descriptors* (FDs) simultaneamente.  
+Parece que um dos testes do exame da 42 para esta função (`picoshell`) primeiro usa o comando no terminal:
 
-'for (int i = 0; i < count - 1; i++){//pipes
-	if (pipe(pipes[i]) < 0){
-		//fechar os anteriores
-		return (1);
-	}
-}'
+```bash
+ulimit -n 1024
+forçando o sistema a permitir no máximo 1024 FDs abertos. E o trecho:
 
-em casos onde tinha um numero superior a 1024 de pipes no commando a função pipes retorna -1 e o picoshell retorna 1 e o perror() no main do tester exiba o Too many open files.
+for (int i = 0; i < count - 1; i++){ // pipes
+    if (pipe(pipes[i]) < 0){
+        // fechar os anteriores
+        return 1;
+    }
+}
+done
 
-### Implementacão 01
+em casos onde havia um número superior a 1024 de pipes no comando, a função pipe() retorna -1 e o picoshell retorna 1. O perror() no main do tester exibe:
+
+```bash
+Too many open files
+done
