@@ -111,4 +111,4 @@ Em casos onde havia um número superior a 1024 de pipes no comando, a função p
 ```bash
 Too many open files
 ```
-done
+## Ideia 099 fazer um picoshell com ft_popen

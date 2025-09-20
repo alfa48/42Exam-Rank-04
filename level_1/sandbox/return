@@ -1,0 +1,345 @@
+SIGACTION(3POSIX)                     POSIX Programmer's Manual                     SIGACTION(3POSIX)
+
+PPRROOLLOOGG
+       This  manual  page is part of the POSIX Programmer's Manual.  The Linux implementation of this
+       interface may differ (consult the corresponding Linux manual page for details of Linux  behav‐
+       ior), or the interface may not be implemented on Linux.
+
+NNAAMMEE
+       sigaction — examine and change a signal action
+
+SSYYNNOOPPSSIISS
+       #include <signal.h>
+
+       int sigaction(int _s_i_g, const struct sigaction *restrict _a_c_t,
+           struct sigaction *restrict _o_a_c_t);
+
+DDEESSCCRRIIPPTTIIOONN
+       The _s_i_g_a_c_t_i_o_n() function allows the calling process to examine and/or specify the action to be
+       associated with a specific signal. The argument _s_i_g specifies the  signal;  acceptable  values
+       are defined in _<_s_i_g_n_a_l_._h_>.
+
+       The  structure ssiiggaaccttiioonn, used to describe an action to be taken, is defined in the _<_s_i_g_n_a_l_._h_>
+       header to include at least the following members:
+
+                 ┌────────────────┬───────────────┬───────────────────────────────────────┐
+                 │  MMeemmbbeerr TTyyppee   │ MMeemmbbeerr NNaammee   │             DDeessccrriippttiioonn               │
+                 ├────────────────┼───────────────┼───────────────────────────────────────┤
+                 │vvooiidd((**)) ((iinntt))   │ _s_a___h_a_n_d_l_e_r    │Pointer to a signal-catching function  │
+                 │                │               │or one of the macros SIG_IGN or        │
+                 │                │               │SIG_DFL.                               │
+                 │ssiiggsseett__tt        │ _s_a___m_a_s_k       │Additional set of signals to be        │
+                 │                │               │blocked during execution of signal-    │
+                 │                │               │catching function.                     │
+                 │iinntt             │ _s_a___f_l_a_g_s      │Special flags to affect behavior of    │
+                 │                │               │signal.                                │
+                 │vvooiidd((**)) ((iinntt,,   │ _s_a___s_i_g_a_c_t_i_o_n  │Pointer to a signal-catching function. │
+                 │  ssiiggiinnffoo__tt **,,  │               │                                       │
+                 │vvooiidd **))         │               │                                       │
+                 └────────────────┴───────────────┴───────────────────────────────────────┘
+       The storage occupied by _s_a___h_a_n_d_l_e_r and _s_a___s_i_g_a_c_t_i_o_n may overlap, and a conforming  application
+       shall not use both simultaneously.
+
+       If  the  argument _a_c_t is not a null pointer, it points to a structure specifying the action to
+       be associated with the specified signal. If the argument _o_a_c_t is not a null pointer,  the  ac‐
+       tion  previously  associated with the signal is stored in the location pointed to by the argu‐
+       ment _o_a_c_t.  If the argument _a_c_t is a null pointer, signal handling  is  unchanged;  thus,  the
+       call  can  be  used  to  enquire about the current handling of a given signal. The SIGKILL and
+       SIGSTOP signals shall not be added to the signal mask using this mechanism;  this  restriction
+       shall be enforced by the system without causing an error to be indicated.
+
+       If  the  SA_SIGINFO  flag (see below) is cleared in the _s_a___f_l_a_g_s field of the ssiiggaaccttiioonn struc‐
+       ture, the _s_a___h_a_n_d_l_e_r field identifies the action to be associated with the  specified  signal.
+       If  the  SA_SIGINFO flag is set in the _s_a___f_l_a_g_s field, the _s_a___s_i_g_a_c_t_i_o_n field specifies a sig‐
+       nal-catching function.
+
+       The _s_a___f_l_a_g_s field can be used to modify the behavior of the specified signal.
+
+       The following flags, defined in the _<_s_i_g_n_a_l_._h_> header, can be set in _s_a___f_l_a_g_s:
+
+       SA_NOCLDSTOP  Do not generate SIGCHLD when children stop or stopped children continue.
+
+                     If _s_i_g is SIGCHLD and the SA_NOCLDSTOP flag is not set in _s_a___f_l_a_g_s, and the  im‐
+                     plementation  supports the SIGCHLD signal, then a SIGCHLD signal shall be gener‐
+                     ated for the calling process whenever any of its  child  processes  stop  and  a
+                     SIGCHLD  signal  may  be  generated  for the calling process whenever any of its
+                     stopped child processes are continued.  If _s_i_g is SIGCHLD and  the  SA_NOCLDSTOP
+                     flag  is  set  in _s_a___f_l_a_g_s, then the implementation shall not generate a SIGCHLD
+                     signal in this way.
+
+       SA_ONSTACK    If set and an alternate signal stack has been declared with  _s_i_g_a_l_t_s_t_a_c_k(),  the
+                     signal  shall be delivered to the calling process on that stack.  Otherwise, the
+                     signal shall be delivered on the current stack.
+
+       SA_RESETHAND  If set, the disposition of the signal shall be reset to SIG_DFL and the  SA_SIG‐
+                     INFO flag shall be cleared on entry to the signal handler.
+
+                     NNoottee::     SIGILL  and  SIGTRAP cannot be automatically reset when delivered; the
+                               system silently enforces this restriction.
+
+                     Otherwise, the disposition of the signal shall not be modified on entry  to  the
+                     signal handler.
+
+                     In  addition,  if  this flag is set, _s_i_g_a_c_t_i_o_n() may behave as if the SA_NODEFER
+                     flag were also set.
+
+       SA_RESTART    This flag affects the behavior of interruptible functions; that is, those speci‐
+                     fied to fail with _e_r_r_n_o set to [[EEIINNTTRR]].  If set, and a function specified as in‐
+                     terruptible is interrupted by this signal, the function shall restart and  shall
+                     not  fail  with [[EEIINNTTRR]] unless otherwise specified. If an interruptible function
+                     which uses a timeout is restarted, the duration of  the  timeout  following  the
+                     restart is set to an unspecified value that does not exceed the original timeout
+                     value. If the flag is not set, interruptible functions interrupted by this  sig‐
+                     nal shall fail with _e_r_r_n_o set to [[EEIINNTTRR]].
+
+       SA_SIGINFO    If  cleared  and the signal is caught, the signal-catching function shall be en‐
+                     tered as:
+
+                         void func(int _s_i_g_n_o);
+
+                     where _s_i_g_n_o is the only argument to the signal-catching function. In this  case,
+                     the  application shall use the _s_a___h_a_n_d_l_e_r member to describe the signal-catching
+                     function and the application shall not modify the _s_a___s_i_g_a_c_t_i_o_n member.
+
+                     If SA_SIGINFO is set and the signal  is  caught,  the  signal-catching  function
+                     shall be entered as:
+
+                         void func(int _s_i_g_n_o, siginfo_t *_i_n_f_o, void *_c_o_n_t_e_x_t);
+
+                     where  two  additional arguments are passed to the signal-catching function. The
+                     second argument shall point to an object of type ssiiggiinnffoo__tt explaining the reason
+                     why  the signal was generated; the third argument can be cast to a pointer to an
+                     object of type uuccoonntteexxtt__tt to refer to the receiving thread's  context  that  was
+                     interrupted  when  the signal was delivered. In this case, the application shall
+                     use the _s_a___s_i_g_a_c_t_i_o_n member to describe the signal-catching function and the ap‐
+                     plication shall not modify the _s_a___h_a_n_d_l_e_r member.
+
+                     The _s_i___s_i_g_n_o member contains the system-generated signal number.
+
+                     The _s_i___e_r_r_n_o member may contain implementation-defined additional error informa‐
+                     tion; if non-zero, it contains an error number identifying  the  condition  that
+                     caused the signal to be generated.
+
+                     The  _s_i___c_o_d_e  member contains a code identifying the cause of the signal, as de‐
+                     scribed in _S_e_c_t_i_o_n _2_._4_._3, _S_i_g_n_a_l _A_c_t_i_o_n_s.
+
+       SA_NOCLDWAIT  If _s_i_g does not equal SIGCHLD, the behavior is unspecified. Otherwise,  the  be‐
+                     havior  of the SA_NOCLDWAIT flag is as specified in _C_o_n_s_e_q_u_e_n_c_e_s _o_f _P_r_o_c_e_s_s _T_e_r_‐
+                     _m_i_n_a_t_i_o_n.
+
+       SA_NODEFER    If set and _s_i_g is caught, _s_i_g shall not be added to the thread's signal mask  on
+                     entry  to  the  signal handler unless it is included in _s_a___m_a_s_k.  Otherwise, _s_i_g
+                     shall always be added to the thread's signal mask on entry to  the  signal  han‐
+                     dler.
+
+       When  a  signal is caught by a signal-catching function installed by _s_i_g_a_c_t_i_o_n(), a new signal
+       mask is calculated and installed for the duration of the signal-catching function (or until  a
+       call to either _s_i_g_p_r_o_c_m_a_s_k() or _s_i_g_s_u_s_p_e_n_d() is made). This mask is formed by taking the union
+       of the current signal mask and the value of the _s_a___m_a_s_k for the signal  being  delivered,  and
+       unless  SA_NODEFER  or  SA_RESETHAND is set, then including the signal being delivered. If and
+       when the user's signal handler returns normally, the original signal mask is restored.
+
+       Once an action is installed for a specific signal, it shall remain installed until another ac‐
+       tion  is  explicitly  requested  (by another call to _s_i_g_a_c_t_i_o_n()), until the SA_RESETHAND flag
+       causes resetting of the handler, or until one of the _e_x_e_c functions is called.
+
+       If the previous action for _s_i_g had been established by _s_i_g_n_a_l(), the values of the fields  re‐
+       turned in the structure pointed to by _o_a_c_t are unspecified, and in particular _o_a_c_t->_s_a___h_a_n_d_l_e_r
+       is not necessarily the same value passed to _s_i_g_n_a_l().  However,  if  a  pointer  to  the  same
+       structure  or  a  copy thereof is passed to a subsequent call to _s_i_g_a_c_t_i_o_n() via the _a_c_t argu‐
+       ment, handling of the signal shall be as if the original call to _s_i_g_n_a_l() were repeated.
+
+       If _s_i_g_a_c_t_i_o_n() fails, no new signal handler is installed.
+
+       It is unspecified whether an attempt to set the action for a signal that cannot be  caught  or
+       ignored to SIG_DFL is ignored or causes an error to be returned with _e_r_r_n_o set to [[EEIINNVVAALL]].
+
+       If  SA_SIGINFO  is  not set in _s_a___f_l_a_g_s, then the disposition of subsequent occurrences of _s_i_g
+       when it is already pending is implementation-defined; the signal-catching  function  shall  be
+       invoked with a single argument.  If SA_SIGINFO is set in _s_a___f_l_a_g_s, then subsequent occurrences
+       of _s_i_g generated by _s_i_g_q_u_e_u_e() or as a result of any signal-generating function that  supports
+       the  specification  of  an  application-defined  value  (when _s_i_g is already pending) shall be
+       queued in FIFO order until delivered or accepted; the signal-catching function  shall  be  in‐
+       voked  with  three arguments. The application specified value is passed to the signal-catching
+       function as the _s_i___v_a_l_u_e member of the ssiiggiinnffoo__tt structure.
+
+       The result of the use of _s_i_g_a_c_t_i_o_n() and a _s_i_g_w_a_i_t() function concurrently within a process on
+       the same signal is unspecified.
+
+RREETTUURRNN VVAALLUUEE
+       Upon successful completion, _s_i_g_a_c_t_i_o_n() shall return 0; otherwise, -1 shall be returned, _e_r_r_n_o
+       shall be set to indicate the error, and no new signal-catching function shall be installed.
+
+EERRRROORRSS
+       The _s_i_g_a_c_t_i_o_n() function shall fail if:
+
+       EEIINNVVAALL The _s_i_g argument is not a valid signal number or an attempt is made to catch  a  signal
+              that cannot be caught or ignore a signal that cannot be ignored.
+
+       The _s_i_g_a_c_t_i_o_n() function may fail if:
+
+       EEIINNVVAALL An  attempt was made to set the action to SIG_DFL for a signal that cannot be caught or
+              ignored (or both).
+
+       In addition, on systems that do not support the XSI option, the _s_i_g_a_c_t_i_o_n() function may  fail
+       if  the  SA_SIGINFO  flag is set in the _s_a___f_l_a_g_s field of the ssiiggaaccttiioonn structure for a signal
+       not in the range SIGRTMIN to SIGRTMAX.
+
+       _T_h_e _f_o_l_l_o_w_i_n_g _s_e_c_t_i_o_n_s _a_r_e _i_n_f_o_r_m_a_t_i_v_e_.
+
+EEXXAAMMPPLLEESS
+   EEssttaabblliisshhiinngg aa SSiiggnnaall HHaannddlleerr
+       The following example demonstrates the use of _s_i_g_a_c_t_i_o_n() to establish a handler for the  SIG‐
+       INT signal.
+
+           #include <signal.h>
+
+           static void handler(int signum)
+           {
+               /* Take appropriate actions for signal delivery */
+           }
+
+           int main()
+           {
+               struct sigaction sa;
+
+               sa.sa_handler = handler;
+               sigemptyset(&sa.sa_mask);
+               sa.sa_flags = SA_RESTART; /* Restart functions if
+                                            interrupted by handler */
+               if (sigaction(SIGINT, &sa, NULL) == -1)
+                   /* Handle error */;
+
+               /* Further code */
+           }
+
+AAPPPPLLIICCAATTIIOONN UUSSAAGGEE
+       The  _s_i_g_a_c_t_i_o_n()  function supersedes the _s_i_g_n_a_l() function, and should be used in preference.
+       In particular, _s_i_g_a_c_t_i_o_n() and _s_i_g_n_a_l() should not be used in the same process to control  the
+       same  signal.  The behavior of async-signal-safe functions, as defined in their respective DE‐
+       SCRIPTION sections, is as specified by this volume of POSIX.1‐2017, regardless  of  invocation
+       from  a  signal-catching  function.  This  is  the only intended meaning of the statement that
+       async-signal-safe functions may be used in signal-catching functions without restrictions. Ap‐
+       plications  must  still  consider  all effects of such functions on such things as data struc‐
+       tures, files, and process state. In particular, application developers need  to  consider  the
+       restrictions on interactions when interrupting _s_l_e_e_p() and interactions among multiple handles
+       for a file description. The fact that any specific function  is  listed  as  async-signal-safe
+       does  not necessarily mean that invocation of that function from a signal-catching function is
+       recommended.
+
+       In order to prevent errors arising from interrupting non-async-signal-safe function calls, ap‐
+       plications  should protect calls to these functions either by blocking the appropriate signals
+       or through the use of some programmatic semaphore (see _s_e_m_g_e_t(), _s_e_m___i_n_i_t(),  _s_e_m___o_p_e_n(),  and
+       so  on).  Note  in  particular  that even the ``safe'' functions may modify _e_r_r_n_o; the signal-
+       catching function, if not executing as an independent thread,  should  save  and  restore  its
+       value  in  order to avoid the possibility that delivery of a signal in between an error return
+       from a function that sets _e_r_r_n_o and the subsequent examination of _e_r_r_n_o could  result  in  the
+       signal-catching function changing the value of _e_r_r_n_o.  Naturally, the same principles apply to
+       the async-signal-safety of application  routines  and  asynchronous  data  access.  Note  that
+       _l_o_n_g_j_m_p() and _s_i_g_l_o_n_g_j_m_p() are not in the list of async-signal-safe functions. This is because
+       the code executing after _l_o_n_g_j_m_p() and _s_i_g_l_o_n_g_j_m_p() can call any  unsafe  functions  with  the
+       same  danger  as calling those unsafe functions directly from the signal handler. Applications
+       that use _l_o_n_g_j_m_p() and _s_i_g_l_o_n_g_j_m_p() from within signal handlers require rigorous protection in
+       order  to  be portable. Many of the other functions that are excluded from the list are tradi‐
+       tionally implemented using either _m_a_l_l_o_c() or _f_r_e_e() functions or the  standard  I/O  library,
+       both  of  which traditionally use data structures in a non-async-signal-safe manner. Since any
+       combination of different functions using a common data structure can cause async-signal-safety
+       problems, this volume of POSIX.1‐2017 does not define the behavior when any unsafe function is
+       called in a signal handler that interrupts an unsafe function.
+
+       Usually, the signal is executed on the stack that was in effect before the signal  was  deliv‐
+       ered. An alternate stack may be specified to receive a subset of the signals being caught.
+
+       When  the  signal  handler returns, the receiving thread resumes execution at the point it was
+       interrupted unless the signal handler makes other arrangements. If _l_o_n_g_j_m_p() or ___l_o_n_g_j_m_p()  is
+       used to leave the signal handler, then the signal mask must be explicitly restored.
+
+       This  volume  of  POSIX.1‐2017  defines  the third argument of a signal handling function when
+       SA_SIGINFO is set as a vvooiidd ** instead of a uuccoonntteexxtt__tt **, but without requiring type  checking.
+       New  applications should explicitly cast the third argument of the signal handling function to
+       uuccoonntteexxtt__tt **.
+
+       The BSD optional four argument signal handling function is not supported  by  this  volume  of
+       POSIX.1‐2017. The BSD declaration would be:
+
+           void handler(int _s_i_g, int _c_o_d_e, struct sigcontext *_s_c_p,
+               char *_a_d_d_r);
+
+       where  _s_i_g  is  the signal number, _c_o_d_e is additional information on certain signals, _s_c_p is a
+       pointer to the ssiiggccoonntteexxtt structure, and _a_d_d_r is additional address information. Much the same
+       information  is  available in the objects pointed to by the second argument of the signal han‐
+       dler specified when SA_SIGINFO is set.
+
+       Since the _s_i_g_a_c_t_i_o_n() function is allowed but not required to set SA_NODEFER when the applica‐
+       tion  sets  the SA_RESETHAND flag, applications which depend on the SA_RESETHAND functionality
+       for the newly installed signal handler must always explicitly set  SA_NODEFER  when  they  set
+       SA_RESETHAND in order to be portable.
+
+       See  also the rationale for Realtime Signal Generation and Delivery in the Rationale (Informa‐
+       tive) volume of POSIX.1‐2017, _S_e_c_t_i_o_n _B_._2_._4_._2, _S_i_g_n_a_l _G_e_n_e_r_a_t_i_o_n _a_n_d _D_e_l_i_v_e_r_y.
+
+RRAATTIIOONNAALLEE
+       Although this volume of POSIX.1‐2017 requires that signals that cannot be ignored shall not be
+       added  to the signal mask when a signal-catching function is entered, there is no explicit re‐
+       quirement that subsequent calls to _s_i_g_a_c_t_i_o_n() reflect this in the information returned in the
+       _o_a_c_t  argument.  In other words, if SIGKILL is included in the _s_a___m_a_s_k field of _a_c_t, it is un‐
+       specified whether or not a subsequent call to _s_i_g_a_c_t_i_o_n() returns with SIGKILL included in the
+       _s_a___m_a_s_k field of _o_a_c_t.
+
+       The  SA_NOCLDSTOP  flag,  when  supplied  in  the  _a_c_t->_s_a___f_l_a_g_s parameter, allows overloading
+       SIGCHLD with the System V semantics that each SIGCLD  signal  indicates  a  single  terminated
+       child. Most conforming applications that catch SIGCHLD are expected to install signal-catching
+       functions that repeatedly call the _w_a_i_t_p_i_d() function with the WNOHANG  flag  set,  acting  on
+       each child for which status is returned, until _w_a_i_t_p_i_d() returns zero. If stopped children are
+       not of interest, the use of the SA_NOCLDSTOP flag can prevent the overhead from  invoking  the
+       signal-catching routine when they stop.
+
+       Some  historical  implementations also define other mechanisms for stopping processes, such as
+       the _p_t_r_a_c_e() function. These implementations usually do not generate  a  SIGCHLD  signal  when
+       processes  stop  due  to  this  mechanism; however, that is beyond the scope of this volume of
+       POSIX.1‐2017.
+
+       This volume of POSIX.1‐2017 requires that calls to _s_i_g_a_c_t_i_o_n() that supply a NULL _a_c_t argument
+       succeed,  even  in  the  case of signals that cannot be caught or ignored (that is, SIGKILL or
+       SIGSTOP).  The System V _s_i_g_n_a_l() and BSD _s_i_g_v_e_c() functions return  [[EEIINNVVAALL]]  in  these  cases
+       and, in this respect, their behavior varies from _s_i_g_a_c_t_i_o_n().
+
+       This  volume  of POSIX.1‐2017 requires that _s_i_g_a_c_t_i_o_n() properly save and restore a signal ac‐
+       tion set up by the ISO C standard _s_i_g_n_a_l() function. However, there is no guarantee  that  the
+       reverse  is  true,  nor could there be given the greater amount of information conveyed by the
+       ssiiggaaccttiioonn structure. Because of this, applications should avoid using both functions  for  the
+       same  signal  in the same process. Since this cannot always be avoided in case of general-pur‐
+       pose library routines, they should always be implemented with _s_i_g_a_c_t_i_o_n().
+
+       It was intended that the _s_i_g_n_a_l() function should be implementable as a library routine  using
+       _s_i_g_a_c_t_i_o_n().
+
+       The POSIX Realtime Extension extends the _s_i_g_a_c_t_i_o_n() function as specified by the POSIX.1‐1990
+       standard to allow the application to request on a per-signal basis via  an  additional  signal
+       action flag that the extra parameters, including the application-defined signal value, if any,
+       be passed to the signal-catching function.
+
+FFUUTTUURREE DDIIRREECCTTIIOONNSS
+       None.
+
+SSEEEE AALLSSOO
+       _S_e_c_t_i_o_n _2_._4, _S_i_g_n_a_l _C_o_n_c_e_p_t_s, _e_x_e_c, ___E_x_i_t(), _k_i_l_l(), ___l_o_n_g_j_m_p(), _l_o_n_g_j_m_p(), _p_t_h_r_e_a_d___s_i_g_m_a_s_k(),
+       _r_a_i_s_e(),  _s_e_m_g_e_t(), _s_e_m___i_n_i_t(), _s_e_m___o_p_e_n(), _s_i_g_a_d_d_s_e_t(), _s_i_g_a_l_t_s_t_a_c_k(), _s_i_g_d_e_l_s_e_t(), _s_i_g_e_m_p_t_y_‐
+       _s_e_t(), _s_i_g_f_i_l_l_s_e_t(), _s_i_g_i_s_m_e_m_b_e_r(), _s_i_g_n_a_l(), _s_i_g_s_u_s_p_e_n_d(), _w_a_i_t(), _w_a_i_t_i_d()
+
+       The Base Definitions volume of POSIX.1‐2017, <<ssiiggnnaall..hh>>
+
+CCOOPPYYRRIIGGHHTT
+       Portions of this  text  are  reprinted  and  reproduced  in  electronic  form  from  IEEE  Std
+       1003.1-2017,  Standard  for  Information  Technology  --  Portable  Operating System Interface
+       (POSIX), The Open Group Base Specifications Issue 7, 2018 Edition, Copyright (C) 2018  by  the
+       Institute  of  Electrical  and Electronics Engineers, Inc and The Open Group.  In the event of
+       any discrepancy between this version and the original IEEE and The Open  Group  Standard,  the
+       original  IEEE  and The Open Group Standard is the referee document. The original Standard can
+       be obtained online at http://www.opengroup.org/unix/online.html .
+
+       Any typographical or formatting errors that appear in this page are most likely to  have  been
+       introduced  during  the  conversion of the source files to man page format. To report such er‐
+       rors, see https://www.kernel.org/doc/man-pages/reporting_bugs.html .
+
+IEEE/The Open Group                              2017                               SIGACTION(3POSIX)
