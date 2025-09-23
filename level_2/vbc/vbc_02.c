@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-
 typedef struct node {
     enum {
         ADD,
@@ -61,47 +60,42 @@ int expect(char **s, char c)
     return (0);
 }
 
-
-//
-
-node *parse_primary(char **s){	
+node *parse_primary(char **s){
 	if (isdigit(**s)){
 		node n = {VAL, **s - '0', NULL, NULL};
 		(*s)++;
 		return (new_node(n));
 	}else{
 		unexpected(**s);
-		return NULL;
+		return NULL;	
 	}
 }
 
-node *parse_term(char **s){	
+node *parse_term(char **s){
 	return parse_primary(s);
 }
-
 
 node    *parse_expr(char **s)
 {
     node *left = parse_term(s);
     if (!left)
-    	return (NULL);
-    while(**s == '+'){
-    	(*s)++;
+    	return NULL;
+    while (expect(s, '+')){
+    	//(*s)++;
+    	
     	node *right = parse_term(s);
     	if (!right){
     		destroy_tree(left);
-		return (NULL);	
+    		return (NULL);
     	}
     	node n = {ADD, 0, left, right};
-    	left =  new_node(n);
+    	left = new_node(n);
     }
-    
 
-    if (**s != '\0') 
+    if (!accept(s, '\0')) 
     {
-    	unexpected(**s);
-    	destroy_tree(left);
-    	return (NULL);
+        destroy_tree(left);
+        return (NULL);
     }
     return (left);
 }
@@ -130,6 +124,35 @@ int main(int argc, char **argv)
     printf("%d\n", eval_tree(tree));
     destroy_tree(tree);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
