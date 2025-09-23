@@ -111,4 +111,42 @@ Em casos onde havia um número superior a 1024 de pipes no comando, a função p
 ```bash
 Too many open files
 ```
+
+
+## sandbox
+
+### O que o exercício pede
+
+Para criares uma função que executa uma função e informa por meio do retorno se a função é boa ou má. Como se as funcões tivessem personalidades kkk. Mas é isso que este exercício pede.
+Brincadeira, apenas a parte da personalidade é brincadeira, o resto infelismente é verdade. Boa sorte em ... Veja o subject para saberes quando é que uma função é boa ou quando é considerada má.
+
+### argumentos da função
+
+```c
+	int sandbox(void (*f)void, int timeout, bool verbose);
+```
+
+```bash
+	void (*f)void
+```
+Uma função que a tua função terá de executar;
+```bash
+	int timeout
+```
+O tempo em segundos que a função f tem para executar para ser classificada como boa, se passar deste tempo não é ...
+```bash
+	bool verbose
+```
+Este é um booleano que se for true então sertas info deverão ser apresentada, tá mais para uma especie de debug você sabe. Não? então já somos dois.
+
+### retorno da função
+
+Como já notaste a função sandbox retorna um inteiro, dependendo se a função é boa ou má. ou se a crashou(acho que este ultimo caso o retorno será -1)
+
+### Implementação
+
+Como o objectivo é 
+
+
+
 ## Ideia 099 fazer um picoshell com ft_popen
