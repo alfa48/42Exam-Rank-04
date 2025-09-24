@@ -3,6 +3,7 @@
 #include <ctype.h>
 
 
+
 typedef struct node {
     enum {
         ADD,
@@ -13,6 +14,11 @@ typedef struct node {
     struct node *l;
     struct node *r;
 }   node;
+
+
+
+node    *parse_expr(char **s);
+
 
 node    *new_node(node n)
 {
@@ -62,71 +68,55 @@ int expect(char **s, char c)
 }
 
 
-//
-
-node    *parse_expre(char **s);
-
-node *parse_fact(char **s){	
+node *parse_fact(char **s){
 	if (isdigit(**s)){
 		node n = {VAL, **s - '0', NULL, NULL};
 		(*s)++;
 		return (new_node(n));
-	}else if (accept(s, '(')){
-		node *n = parse_expre(s);
-		if (!n){return (NULL);};
-		if (!expect(s, ')')){destroy_tree(n);return (NULL);}
+	}else 
+	if (accept(s, '(')){
+		node *n = parse_expr(s);
+		if (!n) return (NULL);
+		if (!expect(s, ')')){
+			destroy_tree(n);
+			return (NULL);
+		}
 		return (n);
-		
-	}else{
-		unexpected(**s);
-		return NULL;
 	}
+	unexpected(**s);
+	return (NULL);
 }
 
-node    *parse_term(char **s)
-{
-    node *left = parse_fact(s);
-    if (!left){return (NULL);};
-    while(accept(s, '*')){
-    	node *right = parse_fact(s);
-    	if (!right){destroy_tree(left);return (NULL);}
-    	node *tmp = new_node((node){MULTI, 0, left, right});
-    	if (!tmp){destroy_tree(left);return (NULL);}
-    	left =  tmp;
-    }
-    
-    return (left);
+node *parse_term(char **s){
+	node *left = parse_fact(s);
+	if (!left)
+		return (NULL);
+	while (accept(s, '*')){
+		node *right = parse_fact(s);
+		if (!right){
+			destroy_tree(left);
+    			return (NULL);
+		}
+		node n = {MULTI, 0, left, right};
+		left = new_node(n);
+	}
+    	return (left);
 }
 
-node    *parse_expre(char **s)
+
+node    *parse_expr(char **s)
 {
     node *left = parse_term(s);
-    if (!left){return (NULL);};
-    while(accept(s, '+')){
+    if (!left) return (NULL);
+    while (accept(s, '+')){
     	node *right = parse_term(s);
     	if (!right){destroy_tree(left);return (NULL);}
-    	node *tmp = new_node((node){ADD, 0, left, right});
-    	if (!tmp){destroy_tree(left);return (NULL);}
-    	left =  tmp;
+    	node n = {ADD, 0, left, right};
+    	left = new_node(n);	
     }
-    
+    if (**s != '\0') {unexpected(**s);destroy_tree(left);return (NULL);}
     return (left);
 }
-
-node    *parse_expr(char *s)
-{
-    char *ptr = s;
-    node *ret = parse_expre(&ptr);
-    if (!ret){return (NULL);};
-    if (*ptr) 
-    {
-    	unexpected(*ptr);
-    	destroy_tree(ret);
-    	return (NULL);
-    }
-    return (ret);
-}
-
 
 int eval_tree(node *tree)
 {
@@ -145,14 +135,14 @@ int main(int argc, char **argv)
 {
     if (argc != 2)
         return (1);
-    node *tree = parse_expr(argv[1]);
+    char *s = argv[1];
+    node *tree = parse_expr(&s);
     if (!tree)
         return (1);
     printf("%d\n", eval_tree(tree));
     destroy_tree(tree);
     return (0);
 }
-
 
 
 

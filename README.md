@@ -149,4 +149,25 @@ Como o objectivo é
 
 
 
+## vbc
+
+### O que o exercício pede
+
+decoberta: Só descobriste agora!
+Cuidado ao testar o retorno do main com o echo $?
+se executares o ./vbc '2+2+2' vas obter a codigo certo, mas se usares como está no subject ./vbc '2+3' | cat -e aí a saida será do cat e não do teu programa
+
+#### Dicionário
+```bash
+ 
+	<expr> ::= <term> {'+' <term>}*
+	<term> ::= <fact> {'*' <fact>}*
+	<fact> ::= NUM | '(' <expr> ')'
+
+```
+
+
+
+
+
 ## Ideia 099 fazer um picoshell com ft_popen
